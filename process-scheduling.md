@@ -15,19 +15,22 @@ To achieve the CPU virtualization, sharing the CPU between multiple tasks is nee
 * Maximize *throughput* (# of processes that complete per time unit)
 
 
+
 #### Things to Consider in Scheduler
 
 1. Many tasks have different priorities. Interactive web browsers and GUIs have higher priority then program compilation since, the former must respond immediately.
 2. No starvation of lower priorities must occur.
 3. Interactivity of a task should be considered. Interactive processes like GUIs would need very small amount of time on the CPU and rapidly cycle between processes. On the contrary, non-interactive processes need less context switching since switching operation is expensive.
 
-Reference: <www.linuxjournal.com/node/10267>
-
-
-
 
 
 ## Basic Concepts & Terminologies
+
+### CPU and I/O burst
+
+* *CPU Burst*: A CPU burst of performing calculations. 
+* "I/O Burst": Waiting for data transfer in or out of the system. 
+* The scheduling system allows one process to use the CPU while another is waiting for I/O.
 
 ### CPU Scheduler
 
@@ -54,8 +57,6 @@ For all of the algorithms, it is important to compute the average waiting time f
 ### First-come First-serve
 
 Non-preemptive scheduler (제곧내)
-
-
 
 ### Shortest Job First
 
@@ -139,7 +140,12 @@ Non-preemptive scheduler (제곧내)
 
 
 
-### 
+## References
+
+1.  [CPU Scheduling](https://www.cs.uic.edu/~jbell/CourseNotes/OperatingSystems/6_CPU_Scheduling.html)
+2. [CFS](www.linuxjournal.com/node/10267)
+
+
 
 
 
@@ -150,4 +156,3 @@ Non-preemptive scheduler (제곧내)
   - A process can contain multiple threads that share some number of resources (code or data).
 
 
- 
