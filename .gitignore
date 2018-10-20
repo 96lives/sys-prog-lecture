@@ -1,5 +1,5 @@
 # created by https://www.gitignore.io/api/c
-
+*.pdf
 ### C ###
 # Prerequisites
 *.d
