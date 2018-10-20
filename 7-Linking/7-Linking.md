@@ -45,12 +45,12 @@
     - Time: Separate compilation
     - Space: Libraries
 + Linker performs 2 tasks 
-  1.  **Symbol resolution**
+  1.  ***Symbol resolution***
       * **Symbol**
         * Each symbol represent a function, global variable or a static variable (variables that acts as field of functions)
         * Symbol definitions are stored (by compiler) in a symbol table.
       * Symbol resolution maps symbol *reference* to symbol *definition*. Definition of the symbol is where the function or variable is declared. The reference of the symbol is where the symbol is used.  
-  2.  **Relocation**
+  2.  ***Relocation***
       * Merges separate code and data sections into single section. 
       * Relocates symbols from their relative locations to their final absolute locations in executable.
       * Updates all reference to these new symbol positions.
@@ -59,19 +59,28 @@
 
 ## 7.3 Object Files
 
-+ **Relocatable object file**(.o)
-  Contains binary code and data that is used to make executable object files. **Shared object files** can be loaded into memory and linked dynamically.
-+ **Executable object file**
++ ***Relocatable object file(.o)***
+  Contains binary code and data that is used to make executable object files. 
+
++ ***Executable object file***
    Binary code and data that can be copied directly into memory.
+
++ ***Shared object file(.so)*** 
+
+   Special type of relocatable object file that can be loaded into memory and linked dynamically.
 
 
 
 ## 7.4 Relocatable Object Files
 
-The following are the list of files in the ROF
+The following are the list of sections in the ELF
 
 + **ELF header**
   Word size, byte ordering...
+
++ **Segment header table**
+
+  Page size, virtual address and memory segments. 
 
 + **.text**
   Machine code
@@ -114,40 +123,54 @@ The following are the list of files in the ROF
 
 
 
-  ### Question: Why is the static variable and the global variable stored differently?
-
 
 ## 7.5 Symbols and Symbol Tables
 
-+ **Global symbols**
++ ***Global symbols***
 
-  Defined in module *m* and that can be referenced by other modules. Includes non-static functions and global vaiables. **Externals** are symbols referenced in module *m* but defined in other modules.
+  Defined in module *m* and that can be referenced by other modules. Includes **non-static functions** and **non-static global variables**.
 
-+ **Local Symbols**
++ ***External symbols***
 
-  Defined and referenced exclusively by module *m*. Includes static C functions and static global variables. Note that these do not refer to local variables.
+  Global Symbols referenced in module *m* but defined in other modules.
 
-* ELF symbol tables
++ ***Local Symbols***
 
+  Defined and referenced exclusively by module *m*. Includes **static functions** and **static global variables**. Note that these do not refer to local variables.
 
 
 ## 7.6 Symbol Resolution
 
 * Strong and weak symbols
-  * Strong symbols: functions and initialized globals
-  * Weak symbols: uninitialized globals
+  * ***Strong symbols***: functions and initialized globals
+  * ***Weak symbols***: uninitialized globals
+
 * Symbol rules
-  1. Multiple strong symbols are not allowed.
+  1. Multiple strong symbols are not allowed. -> ERROR
   2. Given both strong symbol and weak symbol, choose the strong symbol.
   3. Given multiple weak symbols, peak arbitrary. -> Dangerous!!
 
 * Linking with static libraries
 
-  * **Archive**: Colllection of concatenated relocatable object files storing static libraries. 
+  * **Archive**: Collection of concatenated relocatable object files storing static libraries. 
 
   * Resolving reference conflicts with linkers
 
     In the command, the linker reads from left to right. So, the right archive must solve dependencies of the left side.
+
+    ```
+    1. scan .o files and .a files in the command line order
+    2. During scan, keep list of unresolved references.
+    3. As each new .o files or .a file is seen, resolve references if possible. 
+    4. If exists unresolved file at the end -> ERROR
+    ```
+
+* Disadvantages of static library
+
+  * Duplication in stored executables
+  * Duplication in the running executables
+  * Minor fixes need relinking 
+
 
 
 ## 7.7 Relocation
@@ -168,28 +191,28 @@ After resolution step, it has associated each symbol reference with exactly one 
 
   * Relocation entry tells linker, how to modify the reference of location of the functions or global variable that has been defined externally. 
 
-  * Relocation entries for *code* is placed in .rel.text and *data(variables)* are placed in the .rel.data. 
+  * Relocation entries for *code* is placed in .rel.text and data(variables) are placed in the .rel.data. 
 
 
 * Relocating Symbol References
 
-  * R_X86_64_PC32
+  * ***R_X86_64_PC32***
 
     Use PC-relative address (offset from the current run-time value of the program counter). 
 
-  * R_X86_64_32
+  * ***R_X86_64_32***
 
     Use 32bit absolute address.
 
   ```
   foreach section s {
       foreach relocation entry r {
-          refptr = s + r.offset;
+          refptr = s + r.offset;				//ptr to reference to be relocated
           if (r.type == R_X86_64_PC32) {
-              refaddr = ADDR(s) + r.offset;
+              refaddr = ADDR(s) + r.offset;	//ref's run time address
               *refptr = (unsigned) (ADDR(r.symbol) + r.addend - refaddr);
           }
-          if (r.type == R_X86_64_ew)
+          if (r.type == R_X86_64_32)
           	*refptr = (unsigned) (ADDR(r.symbol) + r.addend);
       }
   }
@@ -201,6 +224,7 @@ After resolution step, it has associated each symbol reference with exactly one 
 
   r.addend (pg. 726): It is a signed constant that is used by some types of relocations to bias the value of the modified reference.  
 
+  **LOOK AT PAGE 727 AND SLIDES FOR EXAMPLES!!!**
 
 
 ## 7.8 Executable Object Files
@@ -235,16 +259,20 @@ After resolution step, it has associated each symbol reference with exactly one 
 * Why dynamic library?
   1. The libraries are update.
   2. Save memory by allowing multiple processes to share the same library code in memory.
-
 * **Shared Library**(.so): Object module that, in either run-time or load-time, can be loaded at an arbitrary memory address and linked with a program in memory. 
-
   * Shared meaning
 
     1. The code and data in .so file are shared bu all of the executable object files that reference the library.
 
     2. A single copy of the .text section  of a shared library in memory can be shared by different running processes.
-
   * Link statically when creating executable file, then link dynamically.
+* Commands for dynamic library
+  use `man dlopen` !!!!!!
+  * `void *dlopen(const char *filename, int flag)`: opens the shared object file
+  * `void *dlsym(void *handle, char *symbol)`: returns pointer to symbol
+  * `int dlclose(void *handle`: unloads the shared library
+  * `const char *dlerror(void)`: returns a string describing the most recent error
+  * To compile, use `gcc -rdynamic -o main main.c -ldl`
 
 
 
@@ -254,7 +282,7 @@ After resolution step, it has associated each symbol reference with exactly one 
 
 
 
-## 7.12 Position-Independent code (PIC)
+## 7.12 Position-Independent Code (PIC)
 
 * **PIC**: Code that can be loaded without needing any relocations. Compiled using PC-relative addressing and relocated by static linker. 
 

@@ -1,5 +1,7 @@
 # 9. Virtual Memory
 
+
+
 ## 9.1 Physical and Virtual Addressing
 
 * *Physical Address(PA)*: The address of the real main memory.
@@ -8,16 +10,52 @@
 
 * *Address Translation*: The task of converting the PA to VA.
 
-* *Memory Management Unit(MMU)*: The CPU chip that does address translation.
+* *Memory Management Unit (MMU)*: The CPU chip that does address translation.
+
 
 
 ## 9.2 Address Space
 
-The distinction of *virtual address space* and *physical address space* is needed.
+The distinction of *virtual address space (VA)* and *physical address space* is needed for the distinction of bytes and addresses. 
 
 
 
 ## 9.3 VM as a Tool for Caching
+
+The contents of the disk are cached in main memory. The data on disk is partitioned with blocks and is the unit of transferring data. VM is also divided into fixed-sized block called *virtual pages* and likewise, the physical memory is partitioned into *physical pages (physical frames)*. 
+
+* Virtual page may be either 
+  * Unallocated: do not have any data associated with them
+  * Cached: allocated pages that are cached in physical memory
+  * Uncached: allocated pages that are not cached in physical memory. 
+
+
+
+### 9.3.1 DRAM Cache Organization
+
+Since the disk is 10000 slower than the DRAM,  
+
+* Always use write-back instead of write-through
+
+* DRAM caches are fully associative (any virtual page can be placed in any physical page) 
+
+
+### 9.3.2 Page Tables
+
+* ***Page Table***: maps vitual pages to physical pages.
+* Page table is an array of ***Page Table Entries (PTE)***
+* PTE has *valid bit* which indicates if the address is cached in the physical memory (DRAM).  
+* 
+
+### 9.3.3 Page Hits
+
+### 9.3.4 Page Faults
+
+### 9.3.5 Allocating Pages
+
+### 9.3.6 Locality to the Rescue Again
+
+
 
 ## 9.4 VM as a Tool for Memory Management
 
@@ -51,15 +89,15 @@ The distinction of *virtual address space* and *physical address space* is neede
 
 * `void *malloc(size_t size)`
 
-  * returns a pointer to a block of memory at least `size` bytes that is aligned. 
+  * returns a pointer to a block of memory at least `size` bytes that is aligned.
   * If problem occurs, returns `NULL`.
   * The memory is not initialized .
-  * In 64-bit mode, the block address must be multiple of 16. 
+  * In 64-bit mode, the block address must be multiple of 16.
 
-* `void *sbrk(intptr_t inc)` 
+* `void *sbrk(intptr_t inc)`
 
-  * Grows or shrinks the heap by adding `incr` to the kernel's `brk` pointer. 
-  * If successful returns old `brk` value, else returns `-1`. 
+  * Grows or shrinks the heap by adding `incr` to the kernel's `brk` pointer.
+  * If successful returns old `brk` value, else returns `-1`.
 
 * `void free(void *ptr)`
 
@@ -72,11 +110,11 @@ The distinction of *virtual address space* and *physical address space* is neede
 
 ### 9.9.2 Why Dynamic Memory Allocation?
 
-To allocate the memory with memory size found at run time. 
+To allocate the memory with memory size found at run time.
 
 
 
-### 9.9.3 Allocator Requirements and Goals 
+### 9.9.3 Allocator Requirements and Goals
 
 * Requirements
 
@@ -90,18 +128,18 @@ To allocate the memory with memory size found at run time.
 
   * Maximizing throughput -> maximize requests per unit time
 
-  * Maximizing memory utilization 
+  * Maximizing memory utilization
 
-    After the `k`th request finished, let *aggregate payload* `P_k` denote sum of resulting allocated blocks. Let `H_k` denote the current size of the heap. The goal is to maximize `P_k / H_k`. 
+    After the `k`th request finished, let *aggregate payload* `P_k` denote sum of resulting allocated blocks. Let `H_k` denote the current size of the heap. The goal is to maximize `P_k / H_k`.
 
 
 ### 9.9.4 Fragmentation
 
-***Fragmentation***: The phenomenon when unused memory is not available to allocate request. 
+***Fragmentation***: The phenomenon when unused memory is not available to allocate request.
 
-* *Internal fragmentation*: Occurs when the allocated block is larger than the payload. 
+* *Internal fragmentation*: Occurs when the allocated block is larger than the payload.
 
-* *External fragmentation*: Occurs when there is enough aggregate free memory to satisfy an allocate request, but no single free block is large enough to handle the request. 
+* *External fragmentation*: Occurs when there is enough aggregate free memory to satisfy an allocate request, but no single free block is large enough to handle the request.
 
 
 ### 9.9.5 Implementation Issues
@@ -126,13 +164,13 @@ Goal: To distinguish block boundaries.
      * One byte
      * Encodes 29 bit with block size and 3 *allocated bit* (which marks the allocation of the block)
      * Block size contains the header and padding.
-     * ex) allocated block with 0x18 bytes and allocated -> header is 0x19 
+     * ex) allocated block with 0x18 bytes and allocated -> header is 0x19
   2. ***Payload***
-  3. ***Padding***: has many reasons for doing so. 
+  3. ***Padding***: has many reasons for doing so.
 
 *  ***Implicit Free List***
-  * Free blocks are linked implicitly by the size fields in the headers. 
-  * Ex) see pg884, fig9.36 
+  * Free blocks are linked implicitly by the size fields in the headers.
+  * Ex) see pg884, fig9.36
 
 
 
@@ -155,19 +193,19 @@ Once the allocator found the free block that fits, it must choose how much of th
 
 ### 9.9.9 Getting Additional Heap Memory
 
-If the allocator is unable to find a fit for the block, then it first tries to merge the adjacent free block together. If the extended free block is still too small, then it request the kernel for additional heap memory by calling `sbrk` function. 
+If the allocator is unable to find a fit for the block, then it first tries to merge the adjacent free block together. If the extended free block is still too small, then it request the kernel for additional heap memory by calling `sbrk` function.
 
 
 
-### 9.9.10 Coalescing Free Blocks 
+### 9.9.10 Coalescing Free Blocks
 
 * ***False fragmentation***: If the freed block is adjacent but regarded as 2 separate free blocks, it may fail to address allocation even though the whole memory fits.
 
-* ***Coalescing***: Merging adjacent blocks each time a block is freed. 
+* ***Coalescing***: Merging adjacent blocks each time a block is freed.
 
   * *Immediate coalescing*: coalescing when freed.
 
-  * *deferred coalescing*: coalescing later. 
+  * *deferred coalescing*: coalescing later.
 
 
 ### 9.9.11 Coalescing with Boundary Tags
@@ -184,13 +222,13 @@ TODO: Write the code and put comments!!
 
 ### 9.9.13 Explicit Free Lists
 
-Want: to optimize the data structure so that the next free block can be found faster. 
+Want: to optimize the data structure so that the next free block can be found faster.
 
 * *Doubly linked list*: add `succ` and `pred` to find the next free block -> reduces time of free block finding from # of blocks to # of free blocks.
 
 * *LIFO (Last In First Out)*: Insert the newly freed blocks at the beginning of the list.
 
-* *Address order*: address of each block in the list is less than the address of successor. 
+* *Address order*: address of each block in the list is less than the address of successor.
 
 
 ### 9.9.14 Segregated Free Lists
@@ -199,15 +237,15 @@ Want: to optimize the data structure so that the next free block can be found fa
 
 ## 9.10 Garbage Collection
 
-One has to free the dynamically allocated memory. 
+One has to free the dynamically allocated memory.
 
-C, C++: conservative garbage collector. Unreachable nodes might be incorrectly identified as reachable. 
+C, C++: conservative garbage collector. Unreachable nodes might be incorrectly identified as reachable.
 
-garbage collector is called whenever it needs heap space. 
+garbage collector is called whenever it needs heap space.
 
 ### mark & sweep
 
-marks all reachable descendents 
+marks all reachable descendents
 
 
 
@@ -215,3 +253,4 @@ marks all reachable descendents
 
 ## 9.12 Summary
 
+713 pgs
