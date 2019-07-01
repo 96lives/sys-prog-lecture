@@ -11,8 +11,11 @@
 
     + Translators
       + translates source code(.c or .h) into (relocatable) object file(.o).
+      + preprocessor and linker combined
     + (Static) Linker
       + Links the object files(.o) and static libraries(.a) into executable file.
+    + Loader
+      + For executable, it copies the code and data in the executable file into memory
 
   + Example of how the compiler works in few steps.
 
@@ -38,7 +41,7 @@
 
 ## 7.2 Static Linking
 
-+ **Static Linker**: relocatable object files(.o) -> executable object file
++ **Static Linker**: relocatable object file**s**(.o) -> executable object file
 + Why Linkers?
   - **Modularity**
     -  Programs can be written in set of smaller source files.
@@ -87,15 +90,19 @@ The following are the list of sections in the ELF
   Machine code
 
 + **.rodata**
+
   Read only data
 
 + **.data**
-  Initialize global and static variables. Note that local variables are stored in the stack in run time
+
+  Initialized global and static variables. Note that local variables are stored in the stack in run time
 
 + **.bss**
+
   Uninitialized global and static variables. Occupies no actual space in object file. (Better Save Space!)
 
 + **.symtab**
+
   Information about functions and global variables that are referenced in the program.
 
 + **.rel.text**
@@ -149,7 +156,7 @@ The following are the list of sections in the ELF
 * Symbol rules
   1. Multiple strong symbols are not allowed. -> ERROR
   2. Given both strong symbol and weak symbol, choose the strong symbol.
-  3. Given multiple weak symbols, peak arbitrary. -> Dangerous!!
+  3. Given multiple weak symbols, pick arbitrary. -> Dangerous!!
 
 * Linking with static libraries
 
@@ -180,13 +187,13 @@ After resolution step, it has associated each symbol reference with exactly one 
 
 * Relocation step
 
-  1. Relocating sections and symbol definitions
+  1. Relocating sections and symbol **definitions**
 
      Linker merges all the section of the same type into a new aggregate section of the same type (Ex .data sections are merged into one section). Then, linker assigns run-time memory address to new aggregated sections and symbols.
 
-  2. Relocating symbol references within sections
+  2. Relocating symbol **references** within sections
 
-     Linker modifies every symbol references in the code and data sections so that they point to the correct run-time addresses.
+     Linker modifies every symbol references in the code and data sections so that they point to the correct run-time addresses. It does so, with relocation entries.
 
 * **Relocation Entries**
 
@@ -219,7 +226,7 @@ After resolution step, it has associated each symbol reference with exactly one 
   }
   ```
 
-  ###Question: What does the ADDR(r.symbol), r.addend mean?
+  ### Question: What does the ADDR(r.symbol), r.addend mean?
 
   r.symbol (pg. 726): The symbol identifies the symbol that the modified reference should point to.
 
