@@ -5,20 +5,21 @@
 
   + The term defines the whole compiling process, which eventually creates an executable object file.
 
-  + Example: `gcc -Og -o prog main.c sum.c` which outputs an executable.  
+  + Example: `gcc -Og -o prog main.c sum.c` which outputs an executable.
 
   + It comprises of translators, linker and loader (not dynamic linker)
 
-    + Translators 
+    + Translators
       + translates source code(.c or .h) into (relocatable) object file(.o).
     + (Static) Linker
-      + Links the object files(.o) and static libraries(.a) into executable file. 
+      + Links the object files(.o) and static libraries(.a) into executable file.
 
   + Example of how the compiler works in few steps.
 
     + main.c -> main.i -> main.s -> main.o -> prog
       1. main.c -> main.i
           C preprocessor: c file into intermediate file
+          intermediate file removes macros and comments
           `cpp main.c /tmp/main.i`
 
       2. main.i -> main.s
@@ -40,18 +41,18 @@
 + **Static Linker**: relocatable object files(.o) -> executable object file
 + Why Linkers?
   - **Modularity**
-    -  Programs can be written in set of smaller source files. 
+    -  Programs can be written in set of smaller source files.
   - **Efficiency**
     - Time: Separate compilation
     - Space: Libraries
-+ Linker performs 2 tasks 
++ Linker performs 2 tasks
   1.  ***Symbol resolution***
       * **Symbol**
         * Each symbol represent a function, global variable or a static variable (variables that acts as field of functions)
         * Symbol definitions are stored (by compiler) in a symbol table.
-      * Symbol resolution maps symbol *reference* to symbol *definition*. Definition of the symbol is where the function or variable is declared. The reference of the symbol is where the symbol is used.  
+      * Symbol resolution maps symbol *reference* to symbol *definition*. Definition of the symbol is where the function or variable is declared. The reference of the symbol is where the symbol is used.
   2.  ***Relocation***
-      * Merges separate code and data sections into single section. 
+      * Merges separate code and data sections into single section.
       * Relocates symbols from their relative locations to their final absolute locations in executable.
       * Updates all reference to these new symbol positions.
 
@@ -60,12 +61,12 @@
 ## 7.3 Object Files
 
 + ***Relocatable object file(.o)***
-  Contains binary code and data that is used to make executable object files. 
+  Contains binary code and data that is used to make executable object files.
 
 + ***Executable object file***
    Binary code and data that can be copied directly into memory.
 
-+ ***Shared object file(.so)*** 
++ ***Shared object file(.so)***
 
    Special type of relocatable object file that can be loaded into memory and linked dynamically.
 
@@ -80,7 +81,7 @@ The following are the list of sections in the ELF
 
 + **Segment header table**
 
-  Page size, virtual address and memory segments. 
+  Page size, virtual address and memory segments.
 
 + **.text**
   Machine code
@@ -152,7 +153,7 @@ The following are the list of sections in the ELF
 
 * Linking with static libraries
 
-  * **Archive**: Collection of concatenated relocatable object files storing static libraries. 
+  * **Archive**: Collection of concatenated relocatable object files storing static libraries.
 
   * Resolving reference conflicts with linkers
 
@@ -161,7 +162,7 @@ The following are the list of sections in the ELF
     ```
     1. scan .o files and .a files in the command line order
     2. During scan, keep list of unresolved references.
-    3. As each new .o files or .a file is seen, resolve references if possible. 
+    3. As each new .o files or .a file is seen, resolve references if possible.
     4. If exists unresolved file at the end -> ERROR
     ```
 
@@ -169,19 +170,19 @@ The following are the list of sections in the ELF
 
   * Duplication in stored executables
   * Duplication in the running executables
-  * Minor fixes need relinking 
+  * Minor fixes need relinking
 
 
 
 ## 7.7 Relocation
 
-After resolution step, it has associated each symbol reference with exactly one symbol definition. 
+After resolution step, it has associated each symbol reference with exactly one symbol definition.
 
 * Relocation step
 
   1. Relocating sections and symbol definitions
 
-     Linker merges all the section of the same type into a new aggregate section of the same type (Ex .data sections are merged into one section). Then, linker assigns run-time memory address to new aggregated sections and symbols. 
+     Linker merges all the section of the same type into a new aggregate section of the same type (Ex .data sections are merged into one section). Then, linker assigns run-time memory address to new aggregated sections and symbols.
 
   2. Relocating symbol references within sections
 
@@ -189,16 +190,16 @@ After resolution step, it has associated each symbol reference with exactly one 
 
 * **Relocation Entries**
 
-  * Relocation entry tells linker, how to modify the reference of location of the functions or global variable that has been defined externally. 
+  * Relocation entry tells linker, how to modify the reference of location of the functions or global variable that has been defined externally.
 
-  * Relocation entries for *code* is placed in .rel.text and data(variables) are placed in the .rel.data. 
+  * Relocation entries for *code* is placed in .rel.text and data(variables) are placed in the .rel.data.
 
 
 * Relocating Symbol References
 
   * ***R_X86_64_PC32***
 
-    Use PC-relative address (offset from the current run-time value of the program counter). 
+    Use PC-relative address (offset from the current run-time value of the program counter).
 
   * ***R_X86_64_32***
 
@@ -220,16 +221,16 @@ After resolution step, it has associated each symbol reference with exactly one 
 
   ###Question: What does the ADDR(r.symbol), r.addend mean?
 
-  r.symbol (pg. 726): The symbol identifies the symbol that the modified reference should point to. 
+  r.symbol (pg. 726): The symbol identifies the symbol that the modified reference should point to.
 
-  r.addend (pg. 726): It is a signed constant that is used by some types of relocations to bias the value of the modified reference.  
+  r.addend (pg. 726): It is a signed constant that is used by some types of relocations to bias the value of the modified reference.
 
   **LOOK AT PAGE 727 AND SLIDES FOR EXAMPLES!!!**
 
 
 ## 7.8 Executable Object Files
 
-* **Entry Point**: Address of the first instruction to execute when the program runs. It is in the ELF header. 
+* **Entry Point**: Address of the first instruction to execute when the program runs. It is in the ELF header.
 * Code Segment: Read only. Includes .init, .text, .rodata
 * Data Segment: Read/Write. Includes .data, .bss.
 
@@ -241,7 +242,7 @@ After resolution step, it has associated each symbol reference with exactly one 
 
   Running program invokes the loader. Any linux program can invoke loader by calling `execve` function. Loader copies the code and data in the executable object file from disk into memory, by jumping into entry point.
 
-* **Heap**: Grows upwards when called with dynamic memory. 
+* **Heap**: Grows upwards when called with dynamic memory.
 
 * **Kernel Memory**: OS's memory resident
 * X86-64 run-time memory image (from up to bottom)
@@ -259,7 +260,7 @@ After resolution step, it has associated each symbol reference with exactly one 
 * Why dynamic library?
   1. The libraries are update.
   2. Save memory by allowing multiple processes to share the same library code in memory.
-* **Shared Library**(.so): Object module that, in either run-time or load-time, can be loaded at an arbitrary memory address and linked with a program in memory. 
+* **Shared Library**(.so): Object module that, in either run-time or load-time, can be loaded at an arbitrary memory address and linked with a program in memory.
   * Shared meaning
 
     1. The code and data in .so file are shared bu all of the executable object files that reference the library.
@@ -284,7 +285,7 @@ After resolution step, it has associated each symbol reference with exactly one 
 
 ## 7.12 Position-Independent Code (PIC)
 
-* **PIC**: Code that can be loaded without needing any relocations. Compiled using PC-relative addressing and relocated by static linker. 
+* **PIC**: Code that can be loaded without needing any relocations. Compiled using PC-relative addressing and relocated by static linker.
 
 * PIC Data References
 
@@ -294,9 +295,9 @@ After resolution step, it has associated each symbol reference with exactly one 
 
 ## 7.13 Library Interpoisitioning
 
-* **Library Interpositioning**: Allows you to intercept calls to shared library functions and execute your own code. 
-* Note that giving `-I` argument causes interpositioning. 
+* **Library Interpositioning**: Allows you to intercept calls to shared library functions and execute your own code.
+* Note that giving `-I` argument causes interpositioning.
 * Compile-Time Interpositioning
 * Link-Time Interpositioning
 * Run-Time Interpositioning
-* 
+*
