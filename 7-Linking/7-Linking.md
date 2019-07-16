@@ -293,10 +293,11 @@ After resolution step, it has associated each symbol reference with exactly one 
 ## 7.12 Position-Independent Code (PIC)
 
 * **PIC**: Code that can be loaded without needing any relocations. Compiled using PC-relative addressing and relocated by static linker.
-
 * PIC Data References
-
-  ## 아 몰랑~~~
+* Code section relocation occurs per variable reference
+* While GOT is relocated per variable
+* Data section is originally writable, so additional relocation has no harm
+* ASK QUESTION!!
 
 
 
