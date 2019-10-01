@@ -1,6 +1,37 @@
 # 8. Exceptional Control Flow
 
+## 8.1 Exceptions
 
+### 8.1.1 Exception Handling
+* **Exception number**
+  
+* Every possible exception in system is assigned a unique nonnegative number
+  
+* **Exception Table**
+  * At system boot time, the OS initializes a jump table called exception table
+  * At run time, every entry handles one of the exception.
+
+* **Kernel**
+  * Memory resident part of the operating system
+  
+  * Exception handlers run in **kernel mode** (traps use this intentionally)
+  
+    
+
+### 8.1.2 Classes of Exceptions
+
+|              | Interrupts                     | Traps                          | Faults                              | Aborts                |
+| ------------ | ------------------------------ | ------------------------------ | ----------------------------------- | --------------------- |
+| Cause        | signal from I/O                | Intentional exception          | recoverable error                   | Non-recovarable error |
+| Async / Sync | async                          | sync                           | sync                                | sync                  |
+| Return       | always return next instruction | always return next instruction | might return to current instruction | never return          |
+
+* Fault
+  * If the handler is able to correct the error condition, it returns control to faulting instruction and re-execute it. Otherwise, the handler returns to an abort routine.
+* **System calls**
+  * Linux provides lots of system calls that application programs use when  they want to request service from the kernel.
+  * System calls are provided via trap instructions called `syscall`.
+  * Ex) Writing file, reading file, creating new process...
 
 ## 8.2 Processes
 
@@ -20,7 +51,7 @@
 
 ### 8.2.2 Concurrent Flows
 
-* **Concurrent Flow**: A logical flow whose execturion overlaps in time with another flow. 
+* **Concurrent Flow**: A logical flow whose execturion overlaps in time with another flow.
 * **Parallel Flow**: 2 flows running concurrently on different processors.
 
 
